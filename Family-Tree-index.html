@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Manageable Family Tree</title>
+<div style="text-align:center; color: rgba(255, 227, 149, 0.911); font-size: 18px; margin-bottom: 10px; font-style: italic;">
+  NIM: 252505026 | Nama: Salsabila Azahra Iqlima Puteri | Prodi: Sistem Informasi
+</div>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: url('https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;
+  background-size: cover;
+  padding: 20px;
+}
+h1 {
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0,0,0,.4);
+}
+#controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
+button.secondary { background: #475569; }
+button.danger { background: #dc2626; }
+#tree {
+  min-height: 300px;
+  background: rgba(255,255,255,.85);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+}
+.row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.person {
+  background: #fff;
+  border: 2px solid #2563eb;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 10px;
+  min-width: 120px;
+  text-align: center;
+  cursor: pointer;
+}
+.person.first { font-weight: bold; border-color: #f59e0b; }
+.person.partner { background: #d1fae5; border-color: #10b981; }
+.person.child { background: #dbeafe; border-color: #3b82f6; }
+.selected { border-color: #dc2626; background: #fee2e2; }
+#modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+#modalBox {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 300px;
+}
+#parentType label, #siblingType label { cursor: pointer; margin-right: 12px; }
+</style>
+</head>
+<body>
+<h1>Manageable Family Tree</h1>
+<div id="controls">
+  <button onclick="addFirstPerson()">Add First Person</button>
+  <button onclick="addParent()">Add Parent</button>
+  <button onclick="addSibling()">Add Sibling</button>
+  <button onclick="addPartner()">Add Partner</button>
+  <button onclick="addChild()">Add Child</button>
+  <button class="danger" onclick="deletePerson()">Delete Person</button>
+  <button onclick="showAll()">Tampilkan Semua Anggota</button>
+</div>
+<div id="tree"></div>
+
+<div id="modal">
+  <div id="modalBox">
+    <h3 id="modalTitle">Input Nama</h3>
+    <div id="parentType" style="display:none;margin-bottom:10px">
+      <strong>Jenis Parent:</strong><br>
+      <label><input type="radio" name="ptype" value="Ayah" checked> Ayah</label>
+      <label><input type="radio" name="ptype" value="Ibu"> Ibu</label>
+    </div>
+    <div id="siblingType" style="display:none;margin-bottom:10px">
+      <strong>Jenis Sibling:</strong><br>
+      <label><input type="radio" name="stype" value="Kakak" checked> Kakak</label>
+      <label><input type="radio" name="stype" value="Adik"> Adik</label>
+    </div>
+    <input id="nameInput" type="text" placeholder="Masukkan nama" style="width:100%;padding:8px;margin-bottom:10px" />
+    <div style="text-align:right">
+      <button class="secondary" onclick="closeModal()">Batal</button>
+      <button onclick="confirmName()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let idCounter = 1;
+const people = {};
+let selectedId = null;
+let modalCallback = null;
+let modalMode = 'normal';
+
+function createPerson(name, type='normal'){ return {id:idCounter++, name, parents:[], children:[], partners:[], type}; }
+
+function openModal(cb, mode='normal'){
+  modalCallback = cb;
+  modalMode = mode;
+  document.getElementById('nameInput').value = '';
+  document.getElementById('modalTitle').textContent = mode==='parent' ? 'Input Parent' : 'Input Nama';
+  document.getElementById('parentType').style.display = mode==='parent' ? 'block' : 'none';
+  document.getElementById('siblingType').style.display = mode==='sibling' ? 'block' : 'none';
+  document.getElementById('modal').style.display = 'flex';
+}
+
+function closeModal(){ document.getElementById('modal').style.display = 'none'; }
+
+function confirmName(){
+  const name = document.getElementById('nameInput').value.trim();
+  if(!name) return alert('Nama wajib diisi');
+  let extra = null;
+  if(modalMode==='parent'){ extra = document.querySelector('input[name="ptype"]:checked').value; }
+  if(modalMode==='sibling'){ extra = document.querySelector('input[name="stype"]:checked').value; }
+  closeModal();
+  modalCallback(name, extra);
+}
+
+function card(id){
+  const p = people[id];
+  const d = document.createElement('div');
+  d.className = 'person' + (id === selectedId ? ' selected' : '');
+  if(p.type==='first') d.classList.add('first');
+  if(p.type==='partner') d.classList.add('partner');
+  if(p.type==='child') d.classList.add('child');
+  d.textContent = p.type==='first' ? 'Aku (' + p.name + ')' : p.name;
+  d.onclick = () => { selectedId = id; renderTree(); };
+  return d;
+}
+
+function renderTree(){
+  const tree = document.getElementById('tree');
+  tree.innerHTML = '';
+  if(!selectedId) return;
+  const me = people[selectedId];
+
+  // Parents
+  if(me.parents.length){
+    const parentRow = document.createElement('div'); parentRow.className='row';
+    me.parents.forEach(id => parentRow.appendChild(card(id)));
+    tree.appendChild(parentRow);
+  }
+
+  // Siblings
+  const siblings = new Set();
+  me.parents.forEach(pid => people[pid].children.forEach(cid => siblings.add(cid)));
+  siblings.delete(selectedId);
+  const older = [], younger = [];
+  siblings.forEach(cid => { 
+    if(people[cid].name.includes('(Kakak)')) older.push(cid); 
+    else if(people[cid].name.includes('(Adik)')) younger.push(cid); 
+  });
+  if(older.length || younger.length){
+    const siblingRow = document.createElement('div'); siblingRow.className='row';
+    older.forEach(id => siblingRow.appendChild(card(id)));
+    siblingRow.appendChild(card(selectedId));
+    younger.forEach(id => siblingRow.appendChild(card(id)));
+    tree.appendChild(siblingRow);
+  } else {
+    tree.appendChild(card(selectedId));
+  }
+
+  // Partners
+  if(me.partners.length){
+    const partnerRow = document.createElement('div'); partnerRow.className='row';
+    me.partners.forEach(id => partnerRow.appendChild(card(id)));
+    tree.appendChild(partnerRow);
+  }
+
+  // Children
+  if(me.children.length){
+    const childRow = document.createElement('div'); childRow.className='row';
+    me.children.forEach(id => childRow.appendChild(card(id)));
+    tree.appendChild(childRow);
+  }
+}
+
+// CRUD
+function addFirstPerson(){
+  if(selectedId) return alert('Sudah ada orang');
+  openModal(name => { const p = createPerson(name,'first'); people[p.id]=p; selectedId=p.id; renderTree(); });
+}
+function addParent(){
+  if(!selectedId) return alert('Tambahkan orang pertama dulu');
+  openModal((name,type) => { 
+    const p = createPerson(name+' ('+type+')'); 
+    people[p.id]=p; 
+    p.children.push(selectedId); 
+    people[selectedId].parents.push(p.id); 
+    renderTree(); 
+  },'parent');
+}
+function addSibling(){
+  if(!selectedId) return alert('Pilih orang dulu');
+  const me = people[selectedId]; if(!me.parents.length) return alert('Sibling perlu parent');
+  openModal((name,type)=>{
+    const s = createPerson(name+' ('+type+')');
+    people[s.id] = s;
+    s.parents = [...me.parents];
+    s.parents.forEach(pid=>{
+      const arr = people[pid].children;
+      const idx = arr.indexOf(selectedId);
+      if(!arr.includes(s.id)) arr.splice(type==='Kakak'?idx:idx+1,0,s.id);
+    });
+    renderTree();
+  },'sibling');
+}
+function addPartner(){
+  if(!selectedId) return alert('Pilih orang');
+  openModal(name=>{
+    const p = createPerson(name,'partner');
+    people[p.id]=p;
+    if(!people[selectedId].partners.includes(p.id)){
+      people[selectedId].partners.push(p.id);
+      p.partners.push(selectedId);
+    }
+    renderTree();
+  });
+}
+function addChild(){
+  if(!selectedId) return alert('Pilih orang');
+  openModal(name=>{
+    const c = createPerson(name,'child');
+    people[c.id]=c;
+    c.parents.push(selectedId);
+    people[selectedId].children.push(c.id);
+    renderTree();
+  });
+}
+function deletePerson(){
+  if(!selectedId) return;
+  const id = selectedId; const p = people[id];
+  p.parents.forEach(pid=>people[pid].children = people[pid].children.filter(i=>i!==id));
+  p.children.forEach(cid=>people[cid].parents = people[cid].parents.filter(i=>i!==id));
+  p.partners.forEach(pid=>people[pid].partners = people[pid].partners.filter(i=>i!==id));
+  delete people[id];
+  selectedId = Object.keys(people)[0] || null;
+  renderTree();
+}
+function showAll(){
+  const tree = document.getElementById('tree');
+  tree.innerHTML='';
+  const allRow = document.createElement('div'); allRow.className='row';
+  Object.keys(people).forEach(id => allRow.appendChild(card(id)));
+  tree.appendChild(allRow);
+}
+
+</script>
+</body>
+</html>

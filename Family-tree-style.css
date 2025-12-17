@@ -1,0 +1,91 @@
+body {
+  font-family: Arial, sans-serif;
+  background: url('https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;
+  background-size: cover;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0,0,0,.4);
+}
+
+#controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
+
+button.secondary { background: #475569; }
+button.danger { background: #dc2626; }
+
+#tree {
+  min-height: 300px;
+  background: rgba(255,255,255,.85);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.person {
+  background: #fff;
+  border: 2px solid #2563eb;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 10px;
+  min-width: 120px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.person.first { font-weight: bold; border-color: #f59e0b; }
+.person.partner { background: #d1fae5; border-color: #10b981; }
+.person.child { background: #dbeafe; border-color: #3b82f6; }
+
+.selected { border-color: #dc2626; background: #fee2e2; }
+
+#modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+#modalBox {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 300px;
+}
+
+#parentType label, #siblingType label { 
+  cursor: pointer; 
+  margin-right: 12px; 
+}
+
+#nameInput {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
