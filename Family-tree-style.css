@@ -3,12 +3,14 @@ body {
   background: url('https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;
   background-size: cover;
   padding: 20px;
+  margin: 0;
 }
 
 h1 {
   text-align: center;
   color: #fff;
-  text-shadow: 0 2px 6px rgba(0,0,0,.4);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  margin-bottom: 20px;
 }
 
 #controls {
@@ -26,18 +28,26 @@ button {
   background: #2563eb;
   color: #fff;
   cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  opacity: 0.85;
 }
 
 button.secondary { background: #475569; }
 button.danger { background: #dc2626; }
 
+
 #tree {
   min-height: 300px;
-  background: rgba(255,255,255,.85);
+  background: rgba(255,255,255,0.85);
   border-radius: 12px;
   padding: 20px;
   position: relative;
+  overflow-x: auto;
 }
+
 
 .row {
   display: flex;
@@ -54,6 +64,11 @@ button.danger { background: #dc2626; }
   min-width: 120px;
   text-align: center;
   cursor: pointer;
+  transition: 0.2s;
+}
+
+.person:hover {
+  transform: translateY(-3px);
 }
 
 .person.first { font-weight: bold; border-color: #f59e0b; }
@@ -62,11 +77,15 @@ button.danger { background: #dc2626; }
 
 .selected { border-color: #dc2626; background: #fee2e2; }
 
+
 #modal {
-  display: none;
+  display: none; 
   position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.4);
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.4);
   align-items: center;
   justify-content: center;
   z-index: 1000;
@@ -77,9 +96,11 @@ button.danger { background: #dc2626; }
   padding: 20px;
   border-radius: 8px;
   min-width: 300px;
+  max-width: 90%;
 }
 
-#parentType label, #siblingType label { 
+#parentType label,
+#siblingType label { 
   cursor: pointer; 
   margin-right: 12px; 
 }
@@ -88,4 +109,7 @@ button.danger { background: #dc2626; }
   width: 100%;
   padding: 8px;
   margin-bottom: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
 }
