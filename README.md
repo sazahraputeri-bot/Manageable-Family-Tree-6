@@ -1,12 +1,12 @@
 # Manageable-Family-Tree-6
 
-About Pembuat
+# About Pembuat
 Nama: Salsabila Azahra Iqlima Puteri
 NIM: 252505026
 Prodi: Sistem Informasi
 
-Tujuan
+# Tujuan
 Untuk Mempermudah pembuatan bagan keluarga inti
 
-Harapan
+# Harapan
 Mohon dimaafkan bila masi ada kesalahan dalam pembuatan karena saya masi dalam tahap belajar
